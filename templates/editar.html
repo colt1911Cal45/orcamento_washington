@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Editar Transação</h2>
+
+<form method="post">
+  <div class="mb-3">
+    <label for="descricao" class="form-label">Descrição</label>
+    <input type="text" class="form-control" id="descricao" name="descricao" value="{{ transacao['descricao'] }}" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="valor" class="form-label">Valor</label>
+    <input type="number" step="0.01" class="form-control" id="valor" name="valor" value="{{ transacao['valor'] }}" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="categoria" class="form-label">Categoria</label>
+    <select class="form-select" id="categoria" name="categoria" required>
+      {% set categorias = [
+        "Transporte", "Alimentação", "Creche", "Vestuário", "Fast-food", "Combustível",
+        "Manutenção-veícular", "Lazer", "Outros", "Renda extra", "Doação",
+        "Investimentos", "Educação", "Conhecimento", "Empréstimo", "Salário",
+        "Financiamento do carro", "Água", "Energia", "Aluguel", "Hospedagem", "Medicamento", "Consórcio carro", "Boleto",
+        "Consórcio moto",
+      ] %}
+      {% for cat in categorias %}
+        <option value="{{ cat }}" {% if transacao['categoria'] == cat %}selected{% endif %}>{{ cat }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="tipo" class="form-label">Tipo</label>
+    <select class="form-select" id="tipo" name="tipo" required>
+      <option value="Receita" {% if transacao['tipo'] == 'Receita' %}selected{% endif %}>Receita</option>
+      <option value="Despesa" {% if transacao['tipo'] == 'Despesa' %}selected{% endif %}>Despesa</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="data" class="form-label">Data</label>
+    <input type="date" class="form-control" id="data" name="data" value="{{ transacao['data'] }}" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Situação</label>
+    <select class="form-select" name="pago" required>
+      <option value="Sim" {% if transacao['pago'] == 'Sim' %}selected{% endif %}>Pago</option>
+      <option value="Não" {% if transacao['pago'] == 'Não' %}selected{% endif %}>Não pago</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Usuário</label>
+    <select class="form-select" name="usuario" required>
+      <option value="Rillary" {% if transacao['usuario'] == 'Rillary' %}selected{% endif %}>Rillary</option>
+      <option value="gton" {% if transacao['usuario'] == 'gton' %}selected{% endif %}>gton</option>
+    </select>
+  </div>
+
+  <div class="text-end">
+    <button type="submit" class="btn btn-success">
+      <i class="fa-solid fa-check"></i> Salvar Alterações
+    </button>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">
+      <i class="fa-solid fa-xmark"></i> Cancelar
+    </a>
+  </div>
+</form>
+{% endblock %}

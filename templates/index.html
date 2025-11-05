@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4 text-center text-md-start">Lista de Transações</h2>
+
+<!-- FILTROS -->
+<form method="get" class="row g-3 mb-4">
+  <div class="col-md-2 col-6">
+    <label for="mes" class="form-label">Mês</label>
+    <select id="mes" name="mes" class="form-select">
+      <option value="Todos" {% if mes == 'Todos' or not mes %}selected{% endif %}>Todos</option>
+      {% for m in range(1, 13) %}
+        <option value="{{ '%02d' % m }}" {% if mes == '%02d' % m %}selected{% endif %}>
+          {{ ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][m-1] }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-2 col-6">
+    <label for="ano" class="form-label">Ano</label>
+    <select id="ano" name="ano" class="form-select">
+      <option value="Todos" {% if ano == 'Todos' or not ano %}selected{% endif %}>Todos</option>
+      {% for a in range(2023, 2031) %}
+        <option value="{{ a }}" {% if ano == a|string %}selected{% endif %}>{{ a }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-2 col-6">
+    <label for="categoria" class="form-label">Categoria</label>
+    <select name="categoria" class="form-select">
+      <option value="">Todas</option>
+      {% set categorias = [
+        "Transporte", "Alimentação", "Creche", "Vestuário", "Fast-food", "Combustível",
+        "Manutenção-veícular", "Lazer", "Outros", "Renda extra", "Doação",
+        "Investimentos", "Educação", "Conhecimento", "Empréstimo", "Salário",
+        "Financiamento do carro", "Água", "Energia", "Aluguel", "Hospedagem", "Medicamento", "Consórcio carro", "Boleto",
+        "Consórcio moto",
+      ] %}
+      {% for cat in categorias %}
+        <option value="{{ cat }}" {% if request.args.get('categoria') == cat %}selected{% endif %}>{{ cat }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-2 col-6">
+    <label for="tipo" class="form-label">Tipo</label>
+    <select name="tipo" class="form-select">
+      <option value="">Todos</option>
+      <option value="Receita" {% if request.args.get('tipo') == 'Receita' %}selected{% endif %}>Receita</option>
+      <option value="Despesa" {% if request.args.get('tipo') == 'Despesa' %}selected{% endif %}>Despesa</option>
+    </select>
+  </div>
+
+  <div class="col-md-2 col-6">
+    <label class="form-label">Valor (mín)</label>
+    <input type="number" name="valor_min" class="form-control" step="0.01" value="{{ request.args.get('valor_min', '') }}">
+  </div>
+
+  <div class="col-md-2 col-6">
+    <label class="form-label">Valor (máx)</label>
+    <input type="number" name="valor_max" class="form-control" step="0.01" value="{{ request.args.get('valor_max', '') }}">
+  </div>
+
+  <div class="col-md-2 col-6">
+    <label class="form-label">Usuário</label>
+    <select name="usuario" class="form-select">
+      <option value="">Todos</option>
+      <option value="Rillary" {% if request.args.get('usuario') == 'Rillary' %}selected{% endif %}>Rillary</option>
+      <option value="gton" {% if request.args.get('usuario') == 'gton' %}selected{% endif %}>gton</option>
+    </select>
+  </div>
+
+  <div class="col-12 text-end mt-2">
+    <button type="submit" class="btn btn-primary mb-2">
+      <i class="fa-solid fa-filter"></i> Filtrar
+    </button>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary mb-2">
+      <i class="fa-solid fa-broom"></i> Limpar
+    </a>
+    <a href="{{ url_for('adicionar') }}" class="btn btn-success mb-2">
+      <i class="fa-solid fa-plus"></i> Nova Transação
+    </a>
+    <a href="{{ url_for('extrair_dados') }}" class="btn btn-warning mb-2">
+      <i class="fa-solid fa-image"></i> Importar por Imagem
+    </a>
+  </div>
+</form>
+
+<!-- TABELA DE TRANSAÇÕES -->
+{% set total_receita = namespace(valor=0) %}
+{% set total_despesa = namespace(valor=0) %}
+
+<div class="table-responsive">
+  <table class="table table-striped table-bordered align-middle text-center">
+    <thead class="table-dark">
+      <tr>
+        <th>Descrição</th>
+        <th>Valor (R$)</th>
+        <th>Categoria</th>
+        <th>Tipo</th>
+        <th>Data</th>
+        <th>Situação</th>
+        <th>Usuário</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for transacao in transacoes %}
+        {% if transacao.tipo == 'Receita' %}
+          {% set total_receita.valor = total_receita.valor + transacao.valor %}
+        {% else %}
+          {% set total_despesa.valor = total_despesa.valor + transacao.valor %}
+        {% endif %}
+
+        <tr>
+          <td data-label="Descrição">
+            {% if transacao.tipo == 'Receita' %}
+              <i class="fa-solid fa-arrow-trend-up text-success"></i>
+            {% else %}
+              <i class="fa-solid fa-arrow-trend-down text-danger"></i>
+            {% endif %}
+            {{ transacao.descricao }}
+          </td>
+
+          <td data-label="Valor (R$)">
+            {% if transacao.tipo == 'Receita' %}
+              <span class="text-success fw-bold">{{ transacao.valor|currency }}</span>
+            {% else %}
+              <span class="text-danger fw-bold">{{ transacao.valor|currency }}</span>
+            {% endif %}
+          </td>
+
+          <td data-label="Categoria">
+            {% if transacao.tipo == 'Receita' %}
+              <span class="badge bg-success"><i class="fa-solid fa-tag"></i> {{ transacao.categoria }}</span>
+            {% else %}
+              <span class="badge bg-danger"><i class="fa-solid fa-tag"></i> {{ transacao.categoria }}</span>
+            {% endif %}
+          </td>
+
+          <td data-label="Tipo">
+            {% if transacao.tipo == 'Receita' %}
+              <span class="text-success fw-bold"><i class="fa-solid fa-arrow-trend-up"></i> Receita</span>
+            {% else %}
+              <span class="text-danger fw-bold"><i class="fa-solid fa-arrow-trend-down"></i> Despesa</span>
+            {% endif %}
+          </td>
+
+          {% set data_transacao = transacao.data|datetime_obj %}
+          {% set hoje = now() %}
+          <td data-label="Data">
+            <i class="fa-solid fa-calendar-days"></i>
+            {% if data_transacao.date() == hoje.date() %}
+              <span class="badge bg-info text-dark">Hoje</span> {{ data_transacao.strftime('%d/%m/%Y') }}
+            {% elif data_transacao.date() > hoje.date() %}
+              <span class="text-muted">{{ data_transacao.strftime('%d/%m/%Y') }}</span>
+            {% else %}
+              <span class="text-danger fw-bold">{{ data_transacao.strftime('%d/%m/%Y') }}</span>
+            {% endif %}
+          </td>
+
+          <td data-label="Situação">
+            {% if transacao.pago == 'Sim' %}
+              <span class="badge bg-success"><i class="fa-solid fa-circle-check"></i> Pago</span>
+            {% else %}
+              <span class="badge bg-warning text-dark"><i class="fa-solid fa-clock"></i> Pendente</span>
+            {% endif %}
+          </td>
+
+          <td data-label="Usuário">{{ transacao.usuario }}</td>
+
+          <td data-label="Ações" class="text-center">
+            <a href="{{ url_for('editar', id=transacao.id) }}" class="btn btn-sm btn-primary mb-1">
+              <i class="fa-solid fa-pencil"></i> Editar
+            </a>
+            <a href="{{ url_for('excluir', id=transacao.id) }}" class="btn btn-sm btn-danger mb-1"
+               onclick="return confirm('Tem certeza que deseja excluir?');">
+              <i class="fa-solid fa-trash"></i> Excluir
+            </a>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="8" class="text-center">Nenhuma transação cadastrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- CARDS DE RESUMO -->
+<div class="row text-center my-4 gy-3">
+  <div class="col-md-4 col-12">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <h5><i class="fa-solid fa-arrow-trend-up"></i> Receita Total</h5>
+        <h3>{{ total_receita.valor|currency }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 col-12">
+    <div class="card text-white bg-danger">
+      <div class="card-body">
+        <h5><i class="fa-solid fa-arrow-trend-down"></i> Despesa Total</h5>
+        <h3>{{ total_despesa.valor|currency }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 col-12">
+    <div class="card text-white bg-primary">
+      <div class="card-body">
+        <h5><i class="fa-solid fa-wallet"></i> Saldo Disponível</h5>
+        <h3>{{ (total_receita.valor - total_despesa.valor)|currency }}</h3>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GRÁFICO DE PIZZA -->
+<h3 class="mt-5">Resumo das Transações por Categoria</h3>
+<canvas id="graficoTransacoes" style="max-height:350px;"></canvas>
+
+<!-- GRÁFICO DE BARRAS -->
+<h3 class="mt-5">Comparativo Receita vs Despesa (por Mês)</h3>
+<div class="mb-5" style="min-height: 400px;">
+  <canvas id="graficoComparativo"></canvas>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const jsonData = '{{ transacoes | tojson | safe }}';
+  const transacoesData = JSON.parse(jsonData.replace(/&quot;/g, '"'));
+
+  const categorias = {};
+  const meses = Array.from({ length: 12 }, (_, i) => `${(i + 1).toString().padStart(2, '0')}`);
+  const receitaPorMes = {};
+  const despesaPorMes = {};
+
+  transacoesData.forEach(t => {
+    const mes = t.data.slice(5, 7);
+    const valor = parseFloat(t.valor);
+
+    // Pizza por categoria
+    const cat = t.categoria;
+    categorias[cat] = (categorias[cat] || 0) + valor;
+
+    // Barras por mês
+    if (t.tipo === 'Receita') {
+      receitaPorMes[mes] = (receitaPorMes[mes] || 0) + valor;
+    } else if (t.tipo === 'Despesa') {
+      despesaPorMes[mes] = (despesaPorMes[mes] || 0) + valor;
+    }
+  });
+
+  // === GRÁFICO DE PIZZA ===
+  const ctx1 = document.getElementById('graficoTransacoes');
+  new Chart(ctx1, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(categorias),
+      datasets: [{
+        data: Object.values(categorias),
+        backgroundColor: [
+          '#4CAF50','#FF6384','#FFCE56','#36A2EB','#9966FF','#FF9F40',
+          '#8BC34A','#F44336','#03A9F4','#E91E63','#FFEB3B','#9C27B0'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.label}: R$ ${ctx.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+          }
+        },
+        datalabels: {
+          formatter: v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+          color: '#fff',
+          font: { weight: 'bold' }
+        },
+        title: { display: true, text: 'Distribuição das Transações por Categoria' }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+
+  // === GRÁFICO DE BARRAS ===
+  const ctx2 = document.getElementById('graficoComparativo');
+  new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: meses.map(m => ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][parseInt(m)-1]),
+      datasets: [
+        {
+          label: 'Receitas',
+          data: meses.map(m => receitaPorMes[m] || 0),
+          backgroundColor: '#4CAF50'
+        },
+        {
+          label: 'Despesas',
+          data: meses.map(m => despesaPorMes[m] || 0),
+          backgroundColor: '#F44336'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Comparativo Receita vs Despesa (por Mês)'
+        },
+        legend: { position: 'bottom' }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+          }
+        }
+      }
+    }
+  });
+});
+</script>
+{% endblock %}

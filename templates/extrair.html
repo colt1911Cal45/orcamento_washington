@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">Importar por Imagem (OCR)</h2>
+
+<form method="POST" enctype="multipart/form-data" class="mb-4">
+  <div class="mb-3">
+    <label class="form-label">Imagem da nota/comprovante:</label>
+    <input type="file" name="imagem" accept="image/*,application/pdf" class="form-control" required>
+  </div>
+  <button type="submit" class="btn btn-success">
+    <i class="fa-solid fa-upload"></i> Enviar e Extrair
+  </button>
+</form>
+
+{% if dados %}
+<hr>
+<h4 class="mb-3">✅ Dados detectados (edite se necessário):</h4>
+
+<form method="POST" action="{{ url_for('adicionar') }}" class="row g-3">
+  <div class="col-md-6">
+    <label class="form-label">Descrição</label>
+    <input type="text" name="descricao" class="form-control" value="{{ dados.descricao }}" required>
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Valor</label>
+    <input type="text" name="valor" class="form-control" value="{{ dados.valor }}" placeholder="Ex: 1234,56" required>
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Data</label>
+    <input type="date" name="data" class="form-control" value="{{ dados.data }}" required>
+  </div>
+
+  <div class="col-md-4">
+    <label class="form-label">Tipo</label>
+    <select name="tipo" class="form-select" required>
+      <option value="Despesa" selected>Despesa</option>
+      <option value="Receita" {% if dados.tipo == 'Receita' %}selected{% endif %}>Receita</option>
+    </select>
+  </div>
+
+  <div class="col-md-4">
+    <label class="form-label">Categoria</label>
+    <select name="categoria" class="form-select" required>
+      {% set categorias = [
+        "Transporte","Alimentação","Creche","Vestuário","Fast-food","Combustível",
+        "Manutenção-veícular","Lazer","Outros","Renda extra","Doação",
+        "Investimentos","Educação","Conhecimento","Empréstimo","Salário",
+        "Financiamento do carro","Água","Energia","Aluguel","Higiene","Hospedagem","Farmácia" "Medicamento" , "Consórcio carro", "Boleto",
+        "Consórcio moto",
+      ] %}
+      {% for cat in categorias %}
+        <option value="{{ cat }}" {% if dados.categoria == cat %}selected{% endif %}>{{ cat }}</option>
+      {% endfor %}
+      {% if dados.categoria and dados.categoria not in categorias %}
+        <option value="{{ dados.categoria }}" selected>{{ dados.categoria }}</option>
+      {% endif %}
+    </select>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Parcelas</label>
+    <input type="number" name="parcelas" class="form-control" value="1" min="1" required>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Pago?</label>
+    <select name="pago" class="form-select">
+      <option value="Sim">Sim</option>
+      <option value="Não" selected>Não</option>
+    </select>
+  </div>
+
+  <div class="col-12 text-end">
+    <button type="submit" class="btn btn-primary">
+      <i class="fa-solid fa-check"></i> Confirmar e Salvar
+    </button>
+  </div>
+</form>
+
+<!-- Opcional: mostrar o texto bruto do OCR para conferência -->
+<div class="mt-4">
+  <details>
+    <summary class="text-muted">Prévia do OCR (texto bruto)</summary>
+    <pre class="mt-2" style="white-space: pre-wrap;">{{ dados.ocr_preview }}</pre>
+  </details>
+</div>
+{% endif %}
+{% endblock %}

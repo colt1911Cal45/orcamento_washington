@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Adicionar Nova Transação</h2>
+
+<form method="post">
+  <div class="mb-3">
+    <label for="descricao" class="form-label">Descrição</label>
+    <input type="text" class="form-control" id="descricao" name="descricao" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="valor" class="form-label">Valor total</label>
+    <input type="number" step="0.01" class="form-control" id="valor" name="valor" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="categoria" class="form-label">Categoria</label>
+    <select class="form-select" id="categoria" name="categoria" required>
+      <option selected disabled>Selecione uma categoria</option>
+      {% set categorias = [
+        "Transporte", "Alimentação", "Creche", "Vestuário", "Fast-food", "Combustível",
+        "Manutenção-veícular", "Lazer", "Outros", "Renda extra", "Doação",
+        "Investimentos", "Educação", "Conhecimento", "Empréstimo", "Salário",
+        "Financiamento do carro", "Água", "Energia", "Aluguel", "Hospedagem", "Medicamento", "Consórcio carro", "Boleto",
+        "Consórcio moto",
+      ] %}
+      {% for cat in categorias %}
+        <option value="{{ cat }}">{{ cat }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="tipo" class="form-label">Tipo</label>
+    <select class="form-select" id="tipo" name="tipo" required>
+      <option selected disabled>Selecione o tipo</option>
+      <option value="Receita">Receita</option>
+      <option value="Despesa">Despesa</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="data" class="form-label">Data da 1ª Parcela</label>
+    <input type="date" class="form-control" id="data" name="data" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="parcelas" class="form-label">Parcelas</label>
+    <input type="number" class="form-control" id="parcelas" name="parcelas" min="1" value="1" required>
+    <small class="form-text text-muted">Ex: 3 parcelas gerarão 3 lançamentos (1/3, 2/3, 3/3).</small>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Situação de Pagamento</label>
+    <select class="form-select" name="pago" required>
+      <option value="Sim">Pago</option>
+      <option value="Não" selected>Não pago</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Usuário Responsável</label>
+    <select class="form-select" name="usuario" required>
+      <option selected disabled>Selecione quem está registrando</option>
+      <option value="Rillary">Rillary</option>
+      <option value="gton">gton</option>
+    </select>
+  </div>
+
+  <div class="text-end">
+    <button type="submit" class="btn btn-success">
+      <i class="fa-solid fa-check"></i> Salvar
+    </button>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">
+      <i class="fa-solid fa-xmark"></i> Cancelar
+    </a>
+  </div>
+</form>
+{% endblock %}

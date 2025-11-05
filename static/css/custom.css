@@ -1,0 +1,12 @@
+body {
+    background-color: #f8f9fa;
+  }
+  
+  .table-responsive {
+    margin-top: 20px;
+  }
+  
+  .navbar, .btn {
+    box-shadow: 0 3px 6px rgba(0,0,0,.1);
+  }
+  
