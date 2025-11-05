@@ -22,8 +22,14 @@ except Exception:
 # =========================
 # 🔧 Configurações básicas
 # =========================
-# Ajuste se o Tesseract estiver em outro caminho
-# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# Detecta automaticamente o sistema operacional e define o caminho do Tesseract
+import platform
+if platform.system() == "Windows":
+    # Caminho padrão do Windows (ajuste se estiver em outro local)
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+else:
+    # No Linux (Railway, Ubuntu etc.), o executável é instalado globalmente
+    pytesseract.pytesseract.tesseract_cmd = "tesseract"
 
 app = Flask(__name__)
 from dotenv import load_dotenv
@@ -474,4 +480,5 @@ def logout():
 if __name__ == '__main__':
     # acesse em http://localhost:3000/
     app.run(host='0.0.0.0', port=3000, debug=True)
+
 
