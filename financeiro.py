@@ -23,7 +23,7 @@ except Exception:
 # 🔧 Configurações básicas
 # =========================
 # Ajuste se o Tesseract estiver em outro caminho
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 app = Flask(__name__)
 from dotenv import load_dotenv
@@ -474,3 +474,4 @@ def logout():
 if __name__ == '__main__':
     # acesse em http://localhost:3000/
     app.run(host='0.0.0.0', port=3000, debug=True)
+
